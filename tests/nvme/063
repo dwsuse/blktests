@@ -34,19 +34,19 @@ test() {
 
 	_systemctl_start tlshd
 
-	hostkey=$(nvme gen-dhchap-key -m 1 -n "${def_hostnqn}" 2> /dev/null)
+	hostkey=$(_nvme_gen_kxchap_key --hmac 1 --nqn "${def_hostnqn}" 2> /dev/null)
 	if [ -z "$hostkey" ] ; then
-		echo "nvme gen-dhchap-key failed"
+		echo "key generation failed"
 		_systemctl_stop
 		return 1
 	fi
 
 	_nvmet_target_setup --blkdev file --hostkey "${hostkey}" --tls
 	_set_nvmet_hash "${def_hostnqn}" "hmac(sha256)"
-	_set_nvmet_dhgroup "${def_hostnqn}" "ffdhe2048"
+	_set_nvmet_kxgroup "${def_hostnqn}" "ffdhe2048"
 
 	echo "Test secure concatenation with SHA256"
-	_nvme_connect_subsys --dhchap-secret "${hostkey}" --concat
+	_nvme_connect_subsys --kxchap-secret "${hostkey}" --concat
 
 	ctrl=$(_find_nvme_dev "${def_subsysnqn}")
 	if [[ -z "$ctrl" ]]; then
@@ -76,19 +76,19 @@ test() {
 
 	_nvme_disconnect_subsys
 
-	hostkey=$(nvme gen-dhchap-key -m 2 -n "${def_hostnqn}" 2> /dev/null)
+	hostkey=$(_nvme_gen_kxchap_key --hmac 2 --nqn "${def_hostnqn}" 2> /dev/null)
 	if [ -z "$hostkey" ] ; then
-		echo "nvme gen-dhchap-key failed"
+		echo "key generation failed"
 		_systemctl_stop
 		return 1
 	fi
 
 	_set_nvmet_hostkey "${def_hostnqn}" "${hostkey}"
 	_set_nvmet_hash "${def_hostnqn}" "hmac(sha384)"
-	_set_nvmet_dhgroup "${def_hostnqn}" "ffdhe3072"
+	_set_nvmet_kxgroup "${def_hostnqn}" "ffdhe3072"
 
 	echo "Test secure concatenation with SHA384"
-	_nvme_connect_subsys --dhchap-secret "${hostkey}" --concat
+	_nvme_connect_subsys --kxchap-secret "${hostkey}" --concat
 
 	ctrl=$(_find_nvme_dev "${def_subsysnqn}")
 	if ! _nvme_ctrl_tls_key "$ctrl" > /dev/null ; then

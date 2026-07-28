@@ -2,11 +2,11 @@
 # SPDX-License-Identifier: GPL-3.0+
 # Copyright (C) 2022 Hannes Reinecke, SUSE Labs
 #
-# Test hash and dh group variations for authenticated connections
+# Test hash and kx group variations for authenticated connections
 
 . tests/nvme/rc
 
-DESCRIPTION="Test hash and DH group variations for authenticated connections"
+DESCRIPTION="Test hash and KX group variations for authenticated connections"
 QUICK=1
 
 requires() {
@@ -29,13 +29,13 @@ test() {
 	_setup_nvmet
 
 	local hash
-	local dhgroup
+	local kxgroup
 	local hostkey
 	local ctrldev
 
-	hostkey="$(nvme gen-dhchap-key -n "${def_hostnqn}" 2> /dev/null)"
+	hostkey="$(_nvme_gen_kxchap_key --nqn "${def_hostnqn}" 2> /dev/null)"
 	if [ -z "$hostkey" ] ; then
-		echo "nvme gen-dhchap-key failed"
+		echo "key generation failed"
 		return 1
 	fi
 
@@ -47,18 +47,18 @@ test() {
 
 		_set_nvmet_hash "${def_hostnqn}" "${hash}"
 
-		_nvme_connect_subsys --dhchap-secret "${hostkey}"
+		_nvme_connect_subsys --kxchap-secret "${hostkey}"
 
 		_nvme_disconnect_subsys
 	done
 
-	for dhgroup in "ffdhe2048" "ffdhe3072" "ffdhe4096" "ffdhe6144" "ffdhe8192" ; do
+	for kxgroup in "ffdhe2048" "ffdhe3072" "ffdhe4096" "ffdhe6144" "ffdhe8192" ; do
 
-		echo "Testing DH group ${dhgroup}"
+		echo "Testing KX group ${kxgroup}"
 
-		_set_nvmet_dhgroup "${def_hostnqn}" "${dhgroup}"
+		_set_nvmet_kxgroup "${def_hostnqn}" "${kxgroup}"
 
-		_nvme_connect_subsys --dhchap-secret "${hostkey}"
+		_nvme_connect_subsys --kxchap-secret "${hostkey}"
 
 		_nvme_disconnect_subsys
 	done

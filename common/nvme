@@ -37,6 +37,60 @@ _nvme_def_file_path() {
 	echo "${TMPDIR}/img"
 }
 
+_nvme_kxchap_cmd_style() {
+	if [[ -z "${_nvme_kxchap_style:-}" ]]; then
+		if nvme keys gen-kxchap --nqn nvmf-test-subsys > /dev/null 2>&1; then
+			_nvme_kxchap_style="new"
+		elif nvme gen-dhchap-key --nqn nvmf-test-subsys > /dev/null 2>&1; then
+			_nvme_kxchap_style="old"
+		else
+			_nvme_kxchap_style="none"
+		fi
+	fi
+}
+
+_nvme_tls_cmd_style() {
+	if [[ -z "${_nvme_tls_style:-}" ]]; then
+		if nvme keys gen-tls --subsysnqn nvmf-test-subsys > /dev/null 2>&1; then
+			_nvme_tls_style="new"
+		elif nvme gen-tls-key --subsysnqn nvmf-test-subsys > /dev/null 2>&1; then
+			_nvme_tls_style="old"
+		else
+			_nvme_tls_style="none"
+		fi
+	fi
+}
+
+_nvme_gen_kxchap_key() {
+	_nvme_kxchap_cmd_style
+	case "$_nvme_kxchap_style" in
+	new)
+		nvme keys gen-kxchap "$@"
+		;;
+	old)
+		nvme gen-dhchap-key "$@"
+		;;
+	*)
+		return 1
+		;;
+	esac
+}
+
+_nvme_gen_tls_key() {
+	_nvme_tls_cmd_style
+	case "$_nvme_tls_style" in
+	new)
+		nvme keys gen-tls "$@"
+		;;
+	old)
+		nvme gen-tls-key "$@"
+		;;
+	*)
+		return 1
+		;;
+	esac
+}
+
 _require_nvme_trtype() {
 	local trtype
 	for trtype in "$@"; do
@@ -398,11 +452,11 @@ _nvme_connect_subsys() {
 				hostid="$2"
 				shift 2
 				;;
-			--dhchap-secret)
+			--kxchap-secret)
 				hostkey="$2"
 				shift 2
 				;;
-			--dhchap-ctrl-secret)
+			--kxchap-ctrl-secret)
 				ctrlkey="$2"
 				shift 2
 				;;
@@ -486,10 +540,24 @@ _nvme_connect_subsys() {
 	ARGS+=(--hostnqn="${hostnqn}")
 	ARGS+=(--hostid="${hostid}")
 	if [[ -n "${hostkey}" ]]; then
-		ARGS+=(--dhchap-secret="${hostkey}")
+		case "$_nvme_kxchap_style" in
+		new)
+			ARGS+=(--kxchap-secret="${hostkey}")
+			;;
+		old)
+			ARGS+=(--dhchap-secret="${hostkey}")
+			;;
+		esac
 	fi
 	if [[ -n "${ctrlkey}" ]]; then
-		ARGS+=(--dhchap-ctrl-secret="${ctrlkey}")
+		case "$_nvme_tls_style" in
+		new)
+			ARGS+=(--kxchap-ctrl-secret="${ctrlkey}")
+			;;
+		old)
+			ARGS+=(--dhchap-ctrl-secret="${ctrlkey}")
+			;;
+		esac
 	fi
 	if [[ -n "${nr_io_queues}" ]]; then
 		ARGS+=(--nr-io-queues="${nr_io_queues}")

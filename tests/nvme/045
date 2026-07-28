@@ -37,13 +37,13 @@ test() {
 	local rand_io_size
 	local ns
 
-	hostkey="$(nvme gen-dhchap-key -n "${def_subsysnqn}" 2> /dev/null)"
+	hostkey="$(_nvme_gen_kxchap_key --nqn "${def_subsysnqn}" 2> /dev/null)"
 	if [ -z "$hostkey" ] ; then
 		echo "failed to generate host key"
 		return 1
 	fi
 
-	ctrlkey="$(nvme gen-dhchap-key -n "${def_subsysnqn}" 2> /dev/null)"
+	ctrlkey="$(_nvme_gen_kxchap_key --nqn "${def_subsysnqn}" 2> /dev/null)"
 	if [ -z "$ctrlkey" ] ; then
 		echo "failed to generate ctrl key"
 		return 1
@@ -52,10 +52,10 @@ test() {
 	_nvmet_target_setup --blkdev file --ctrlkey "${ctrlkey}" \
 			    --hostkey "${hostkey}"
 
-	_set_nvmet_dhgroup "${def_hostnqn}" "ffdhe2048"
+	_set_nvmet_kxgroup "${def_hostnqn}" "ffdhe2048"
 
-	_nvme_connect_subsys --dhchap-secret "${hostkey}" \
-			     --dhchap-ctrl-secret "${ctrlkey}"
+	_nvme_connect_subsys --kxchap-secret "${hostkey}" \
+			     --kxchap-ctrl-secret "${ctrlkey}"
 
 	echo "Re-authenticate with original host key"
 
@@ -68,7 +68,7 @@ test() {
 
 	echo "Renew host key on the controller"
 
-	new_hostkey="$(nvme gen-dhchap-key --nqn "${def_subsysnqn}" 2> /dev/null)"
+	new_hostkey="$(_nvme_gen_kxchap_key --nqn "${def_subsysnqn}" 2> /dev/null)"
 
 	_set_nvmet_hostkey "${def_hostnqn}" "${new_hostkey}"
 
@@ -78,7 +78,7 @@ test() {
 
 	echo "Renew ctrl key on the controller"
 
-	new_ctrlkey="$(nvme gen-dhchap-key --nqn "${def_subsysnqn}" 2> /dev/null)"
+	new_ctrlkey="$(_nvme_gen_kxchap_key --nqn "${def_subsysnqn}" 2> /dev/null)"
 
 	_set_nvmet_ctrlkey "${def_hostnqn}" "${new_ctrlkey}"
 
@@ -87,11 +87,11 @@ test() {
 	ctrlkey_file="/sys/class/nvme/${ctrldev}/dhchap_ctrl_secret"
 	echo "${new_ctrlkey}" > "${ctrlkey_file}"
 
-	echo "Change DH group to ffdhe8192"
+	echo "Change KX group to ffdhe8192"
 
-	_set_nvmet_dhgroup "${def_hostnqn}" "ffdhe8192"
+	_set_nvmet_kxgroup "${def_hostnqn}" "ffdhe8192"
 
-	echo "Re-authenticate with changed DH group"
+	echo "Re-authenticate with changed KX group"
 
 	echo "${new_hostkey}" > "${hostkey_file}"
 

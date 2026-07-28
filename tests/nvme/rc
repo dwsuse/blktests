@@ -65,6 +65,8 @@ group_requires() {
 	_have_root
 	_NVMET_TRTYPES_is_valid
 	_have_nvme_cli_with_json_support
+	_nvme_kxchap_cmd_style
+	_nvme_tls_cmd_style
 }
 
 group_device_requires() {
@@ -100,16 +102,16 @@ _require_test_dev_support_sed() {
 }
 
 _require_nvme_cli_auth() {
-	if ! nvme gen-dhchap-key --nqn nvmf-test-subsys > /dev/null 2>&1 ; then
-		SKIP_REASONS+=("nvme gen-dhchap-key command missing")
+	if [[ "$_nvme_kxchap_style" == "none" ]]; then
+		SKIP_REASONS+=("nvme gen-dhchap-key / nvme keys gen-kxchap command missing")
 		return 1
 	fi
 	return 0
 }
 
 _require_nvme_cli_tls() {
-	if ! nvme gen-tls-key --subsysnqn nvmf-test-subsys > /dev/null 2>&1; then
-		SKIP_REASONS+=("nvme gen-tls-key command missing")
+	if [[ "$_nvme_tls_style" == "none" ]]; then
+		SKIP_REASONS+=("nvme gen-tls-key / nvme keys gen-tls command missing")
 		return 1
 	fi
 	return 0
@@ -266,7 +268,7 @@ _set_nvmet_hash() {
 	_set_attr "${nvmet_hash}" "${cfs_path}/dhchap_hash"
 }
 
-_set_nvmet_dhgroup() {
+_set_nvmet_kxgroup() {
 	local nvmet_hostnqn="$1"
 	local nvmet_dhgroup="$2"
 	local cfs_path="${NVMET_CFS}/hosts/${nvmet_hostnqn}"
