@@ -49,6 +49,7 @@ nothing, to run against a target which is configured already.
 | Type | Target |
 | --- | --- |
 | `nvmet` (default) | Linux nvmet target, configured through configfs |
+| `ontap` | NetApp ONTAP storage virtual machine, through the REST API |
 | `package.module:Class` | A `Target` subclass outside this package |
 
 ### nvmet
@@ -79,6 +80,53 @@ hash and DH group of the host.
 The target needs sshd, configfs, losetup and the nvmet modules for the
 transport. The ssh destination may be an alias from the ssh config, `traddr`
 is then its `HostName`.
+
+### ontap
+
+Configures a storage virtual machine (SVM) of a NetApp ONTAP cluster through
+the ONTAP REST API. blktests connects over NVMe/TCP to the LIFs of the SVM:
+
+    [target]
+    type = "ontap"
+    host = "192.0.2.100"
+    user = "admin"
+    password_file = "/root/.config/blktests/ontap-password"
+    svm = "svm1"
+    aggregate = "aggr1"
+
+The first time blktests asks for the subsystem UUID, the target creates the
+volume and the namespace `/vol/VOLUME/ns1` unless they exist. The volume
+gets no snapshots: the tests rewrite the namespace, snapshots would fill
+the volume. Setup creates the subsystem, allows the host and maps the
+namespace to it. Cleanup deletes the subsystem. The volume and namespace
+stay for the next run. The target caches the namespace UUID, the SVM UUID
+and the LIFs in `cache_dir`, and the DH-HMAC-CHAP secrets of the hosts,
+which ONTAP doesn't return.
+
+ONTAP derives the subsystem NQN from the subsystem name: `config
+--show-subsysnqn` shows the NQN of the subsystem `blktests`. The tests which
+use other NQNs need the NQN prefix of the SVM. The ports are the NVMe/TCP
+LIFs, numbered 1 to N by LIF name, each subsystem is reachable on all of
+them. The target implements `list-ports`, `show-port` and `set-host`.
+ONTAP can't modify the DH-HMAC-CHAP settings of a host: `set-host` removes
+the host and adds it again, which drops its connections. ONTAP manages the
+ANA states and doesn't support SHA-384. The target doesn't set up TLS.
+
+| Option | Meaning |
+| --- | --- |
+| `host` | cluster management address |
+| `user` | ONTAP user |
+| `password_file` | file with the password of `user` in its first line, mode 0600 |
+| `svm` | the SVM |
+| `aggregate` | aggregate for the volume, needed if it doesn't exist |
+| `volume` | volume of the namespace, default `blktests` |
+| `volume_size` | size of a new volume, default `4G` |
+| `ns_size` | size of a new namespace, default `2G` |
+| `verify_tls` | verify the certificate of `host`, default true |
+| `cache_dir` | default `~/.cache/nvme-target-control` |
+
+The user needs the rights to manage volumes, namespaces and NVMe
+subsystems of the SVM.
 
 ## Adding a target
 

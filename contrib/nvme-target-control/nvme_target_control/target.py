@@ -210,6 +210,7 @@ OPTIONAL_COMMANDS = {
 
 TARGETS = {
     'nvmet': 'nvme_target_control.targets.nvmet:NvmetTarget',
+    'ontap': 'nvme_target_control.targets.ontap:OntapTarget',
 }
 
 
