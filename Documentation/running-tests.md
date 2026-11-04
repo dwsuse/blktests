@@ -248,6 +248,7 @@ config:
   --show-trsvid
   --show-subsys-uuid
   --show-subsysnqn
+  --show-features
 
 setup:
   --subsysnqn SUBSYSNQN
@@ -287,6 +288,10 @@ set-ana: set the state of an ANA group on the port
   --state STATE
 
 If list-ports prints nothing, blktests connects to the address config shows.
+
+config --show-features prints the optional commands the script supports,
+add-ports to set-host, and tls if the target can set up TLS. blktests skips
+the tests which need a feature the list lacks.
 
 The authentication tests change the DH-CHAP attributes of the host:
 
