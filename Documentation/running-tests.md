@@ -248,6 +248,7 @@ config:
   --show-trsvid
   --show-subsys-uuid
   --show-subsysnqn
+  --show-features
 
 setup:
   --subsysnqn SUBSYSNQN
@@ -258,6 +259,10 @@ setup:
 
 cleanup:
   --subsysnqn SUBSYSNQN
+
+config --show-features prints the optional commands the script supports,
+e.g. add-port, set-ana or set-host, and tls if the target can set up TLS.
+blktests skips the tests which need a feature the list lacks.
 
 contrib/nvme-target-control implements this interface. It configures a Linux
 nvmet target over ssh and can be extended for other targets, see
