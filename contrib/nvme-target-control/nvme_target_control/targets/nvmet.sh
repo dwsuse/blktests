@@ -59,6 +59,11 @@ add_port() {
 	while [ -e "${cfs}/ports/${port}" ]; do
 		port=$((port + 1))
 	done
+	# The target may have other ports, take the first free service ID.
+	while cat "${cfs}"/ports/*/addr_trsvcid 2> /dev/null |
+			grep -qx "${trsvcid}"; do
+		trsvcid=$((trsvcid + 1))
+	done
 	case "${traddr}" in
 	*:*)	adrfam=ipv6 ;;
 	*)	adrfam=ipv4 ;;
@@ -68,7 +73,7 @@ add_port() {
 	echo "${trtype}" > "${cfs}/ports/${port}/addr_trtype"
 	echo "${adrfam}" > "${cfs}/ports/${port}/addr_adrfam"
 	echo "${traddr}" > "${cfs}/ports/${port}/addr_traddr"
-	echo $((trsvcid + port - 1)) > "${cfs}/ports/${port}/addr_trsvcid"
+	echo "${trsvcid}" > "${cfs}/ports/${port}/addr_trsvcid"
 	case "${tls}" in
 	none)
 		;;
