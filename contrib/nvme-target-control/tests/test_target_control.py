@@ -160,7 +160,9 @@ class TestCli(ConfigTestCase):
         self.assertEqual(
             self.show('features'),
             'add-ports add-port remove-port list-ports show-port set-ana '
-            'set-host',
+            'set-host dhchap-sha256 dhchap-sha384 dhchap-sha512 dhchap-null '
+            'dhchap-ffdhe2048 dhchap-ffdhe3072 dhchap-ffdhe4096 '
+            'dhchap-ffdhe6144 dhchap-ffdhe8192',
         )
         self.config.write_text(PLUGIN)
         self.assertEqual(self.show('features'), '')
