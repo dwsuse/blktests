@@ -42,6 +42,8 @@ test() {
 
 	_nvme_connect_subsys --nr-write-queues 1 --nr-poll-queues 1
 
+	ns=$(_find_nvme_ns "${def_subsys_uuid}")
+
 	_run_fio_rand_io --filename="/dev/${ns}" --size="${rand_io_size}"
 
 	_nvme_disconnect_subsys >> "$FULL" 2>&1
