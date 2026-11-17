@@ -261,8 +261,11 @@ cleanup:
   --subsysnqn SUBSYSNQN
 
 config --show-features prints the optional commands the script supports,
-e.g. add-port, set-ana or set-host, and tls if the target can set up TLS.
-blktests skips the tests which need a feature the list lacks.
+e.g. add-port, set-ana or set-host, the DH-HMAC-CHAP hashes and DH groups
+the target supports, e.g. dhchap-sha256 or dhchap-ffdhe2048, and tls if
+the target can set up TLS. blktests skips the tests which need a feature
+the list lacks: the authentication tests without dhchap-sha256, and
+nvme/042 and nvme/043 only the steps for the other missing algorithms.
 
 contrib/nvme-target-control implements this interface. It configures a Linux
 nvmet target over ssh and can be extended for other targets, see

@@ -17,7 +17,7 @@ requires() {
 	_require_nvme_trtype_is_fabrics
 	_require_nvme_cli_auth
 	_have_crypto_algorithm dh-generic
-	_require_nvme_target_control_feature set-host
+	_require_nvme_target_control_feature set-host dhchap-sha256
 }
 
 set_conditions() {
@@ -45,6 +45,7 @@ test() {
 	for hash in sha256 sha384 sha512; do
 
 		echo "Testing hash ${hash}"
+		_have_nvme_target_dhchap "${hash}" || continue
 
 		_set_nvmet_hash "${def_hostnqn}" "hmac(${hash})"
 
@@ -56,6 +57,7 @@ test() {
 	for dhgroup in ffdhe2048 ffdhe3072 ffdhe4096 ffdhe6144 ffdhe8192; do
 
 		echo "Testing DH group ${dhgroup}"
+		_have_nvme_target_dhchap "${dhgroup}" || continue
 
 		_set_nvmet_dhgroup "${def_hostnqn}" "${dhgroup}"
 

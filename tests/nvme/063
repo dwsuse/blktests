@@ -19,7 +19,7 @@ requires() {
 	_require_nvme_trtype tcp
 	_require_nvme_cli_auth
 	_have_systemd_tlshd_service
-	_require_nvme_target_control_feature set-host tls
+	_require_nvme_target_control_feature set-host tls dhchap-sha256
 }
 
 set_conditions() {

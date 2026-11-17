@@ -17,7 +17,7 @@ requires() {
 	_require_nvme_trtype_is_fabrics
 	_require_nvme_cli_auth
 	_have_crypto_algorithm dh-generic
-	_require_nvme_target_control_feature set-host
+	_require_nvme_target_control_feature set-host dhchap-sha256
 }
 
 set_conditions() {

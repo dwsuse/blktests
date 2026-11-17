@@ -16,7 +16,7 @@ requires() {
 	_require_kernel_nvme_fabrics_feature dhchap_ctrl_secret
 	_require_nvme_trtype_is_fabrics
 	_require_nvme_cli_auth
-	_require_nvme_target_control_feature set-host
+	_require_nvme_target_control_feature set-host dhchap-sha256
 }
 
 set_conditions() {
@@ -37,6 +37,7 @@ test() {
 
 	for hash in none sha256 sha384 sha512; do
 		echo "Testing hash ${hash}"
+		_have_nvme_target_dhchap "${hash}" || continue
 		hostkey="$(_nvme_gen_kxchap_secret --hash="${hash}" 2> /dev/null)"
 		if [ -z "$hostkey" ] ; then
 			echo "couldn't generate host key for hash ${hash}"
