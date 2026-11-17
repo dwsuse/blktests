@@ -24,7 +24,15 @@ from pathlib import Path
 from typing import Any
 
 from .. import channel
-from ..target import Port, Subsystem, Target, resolve
+from ..target import (
+    DHCHAP_DHGROUPS,
+    DHCHAP_HASHES,
+    Port,
+    Subsystem,
+    Target,
+    dhchap_features,
+    resolve,
+)
 
 SCRIPT = Path(__file__).resolve().parent / 'nvmet.sh'
 
@@ -39,6 +47,8 @@ HOST_ATTRS = {
 
 class NvmetTarget(Target):
     """Linux nvmet target."""
+
+    extra_features = dhchap_features(DHCHAP_HASHES + DHCHAP_DHGROUPS)
 
     def __init__(self, config: dict[str, Any]) -> None:
         super().__init__(config)

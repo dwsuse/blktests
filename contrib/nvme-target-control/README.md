@@ -118,10 +118,13 @@ channel is a subclass of `Channel` which returns the command running
 The port commands and `set-host` are optional. A target implements them
 by overriding `add_ports`, `add_port`, `remove_port`, `list_ports`,
 `show_port`, `set_ana` and `set_host`. `config --show-features` lists the
-ones it overrides, followed by the class attribute `extra_features`, e.g.
-`tls`. blktests skips the tests which need a feature the target doesn't
-list. Without `list-ports` and `show-port`, blktests connects to `traddr`
-and `trsvid`.
+ones it overrides, followed by the class attribute `extra_features`: the
+DH-HMAC-CHAP hashes and DH groups the target supports, e.g.
+`dhchap-sha256` or `dhchap-ffdhe2048` (`dhchap_features()` builds them),
+and `tls` if it sets up TLS. blktests skips the tests which need a
+feature the target doesn't list, and the steps of nvme/042 and nvme/043
+which use an algorithm the target doesn't list. Without `list-ports` and
+`show-port`, blktests connects to `traddr` and `trsvid`.
 
 ## Development
 

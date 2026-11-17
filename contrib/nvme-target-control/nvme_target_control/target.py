@@ -11,6 +11,7 @@ API, can be added as 'package.module:Class' in the [target] 'type' option.
 
 import socket
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, ClassVar
@@ -22,6 +23,23 @@ DEF_HOSTID = '0f01fb42-9f7f-4856-b0b3-51e60b8de349'
 DEF_SUBSYSNQN = 'blktests-subsystem-1'
 DEF_SUBSYS_UUID = '91fdba0d-f87b-4c25-b80f-db7be1418b9e'
 DEF_TRSVCID = '4420'
+
+# The DH-HMAC-CHAP hashes and DH groups, named as in the nvmet configfs
+# without hmac() around the hash
+DHCHAP_HASHES = ('sha256', 'sha384', 'sha512')
+DHCHAP_DHGROUPS = (
+    'null',
+    'ffdhe2048',
+    'ffdhe3072',
+    'ffdhe4096',
+    'ffdhe6144',
+    'ffdhe8192',
+)
+
+
+def dhchap_features(algorithms: Iterable[str]) -> tuple[str, ...]:
+    """Return the features for the DH-HMAC-CHAP hashes and DH groups."""
+    return tuple(f'dhchap-{alg}' for alg in algorithms)
 
 
 @dataclass(frozen=True)
