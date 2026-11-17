@@ -155,18 +155,37 @@ _require_remote_nvme_target() {
 	return 0
 }
 
-# Skip the test if the NVME_TARGET_CONTROL target lacks one of the features,
-# the optional commands and e.g. tls, see Documentation/running-tests.md.
-_require_nvme_target_control_feature() {
-	local features feature
+# Check if the NVME_TARGET_CONTROL target lists the feature, one of the
+# optional commands or e.g. tls, see Documentation/running-tests.md. The
+# local target has all of them.
+_have_nvme_target_control_feature() {
+	local features
 
 	if [[ -z "${nvme_target_control}" ]]; then
 		return 0
 	fi
 	features=" $("${nvme_target_control}" config --show-features) "
+	# shellcheck disable=SC2076 # match the feature literally
+	[[ "${features}" =~ " $1 " ]]
+}
+
+# Check if the target supports the DH-HMAC-CHAP hash or DH group, e.g. sha384
+# or ffdhe2048, and log it if it doesn't. Every target which can do
+# DH-HMAC-CHAP supports sha256, a secret with hash none needs no support.
+_have_nvme_target_dhchap() {
+	if [[ "$1" == none ]] || _have_nvme_target_control_feature "dhchap-$1"; then
+		return 0
+	fi
+	echo "Target lacks $1, skipped" >> "$FULL"
+	return 1
+}
+
+# Skip the test if the NVME_TARGET_CONTROL target lacks one of the features.
+_require_nvme_target_control_feature() {
+	local feature
+
 	for feature in "$@"; do
-		# shellcheck disable=SC2076 # match the feature literally
-		if [[ ! "${features}" =~ " ${feature} " ]]; then
+		if ! _have_nvme_target_control_feature "${feature}"; then
 			SKIP_REASONS+=("NVME_TARGET_CONTROL target does not support ${feature}")
 			return 1
 		fi
