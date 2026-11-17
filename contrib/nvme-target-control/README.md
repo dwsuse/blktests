@@ -61,12 +61,13 @@ is set, the namespace is a loop device on an image file in
 subsystem, the ports which don't export another subsystem, the hosts no
 other subsystem allows, and the loop device and image file.
 
-A new port gets the lowest free nvmet port ID N, starting at 1, and listens
-on `traddr` at service ID `trsvid` + N - 1. The first port of a target
-without other ports listens on `trsvid`. The nvmet target implements all
-port commands: `add-ports`, `add-port`, `remove-port`, `list-ports`,
-`show-port` and `set-ana`, and `set-host`, which changes the DH-CHAP keys,
-hash and DH group of the host.
+A new port gets the lowest free nvmet port ID, starting at 1, and the
+lowest service ID from `trsvid` up which no other port uses: the first
+port listens on `traddr` at `trsvid` unless another port of the target
+does. The nvmet target implements all port commands: `add-ports`,
+`add-port`, `remove-port`, `list-ports`, `show-port` and `set-ana`, and
+`set-host`, which changes the DH-CHAP keys, hash and DH group of the
+host.
 
 | Option | Meaning |
 | --- | --- |
