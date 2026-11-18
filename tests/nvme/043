@@ -41,18 +41,18 @@ test() {
 
 	_nvmet_target_setup --blkdev file --hostkey "${hostkey}"
 
-	for hash in "hmac(sha256)" "hmac(sha384)" "hmac(sha512)" ; do
+	for hash in sha256 sha384 sha512; do
 
 		echo "Testing hash ${hash}"
 
-		_set_nvmet_hash "${def_hostnqn}" "${hash}"
+		_set_nvmet_hash "${def_hostnqn}" "hmac(${hash})"
 
 		_nvme_connect_subsys --dhchap-secret "${hostkey}"
 
 		_nvme_disconnect_subsys
 	done
 
-	for dhgroup in "ffdhe2048" "ffdhe3072" "ffdhe4096" "ffdhe6144" "ffdhe8192" ; do
+	for dhgroup in ffdhe2048 ffdhe3072 ffdhe4096 ffdhe6144 ffdhe8192; do
 
 		echo "Testing DH group ${dhgroup}"
 

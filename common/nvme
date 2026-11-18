@@ -168,8 +168,26 @@ _nvme_run() {
 	nvme $(_nvme_cmd "$current") "$@"
 }
 
+# Generate a DH-HMAC-CHAP secret. --hash=HASH transforms the secret with HASH:
+# none, sha256, sha384 or sha512. The other arguments go to nvme-cli.
 _nvme_gen_kxchap_secret() {
+	local -a secret_args=()
+	local -A hmac_ids=([none]=0 [sha256]=1 [sha384]=2 [sha512]=3)
+
 	_nvme_cli_detect_version
+
+	while (($#)); do
+		case "$1" in
+		--hash=*)
+			secret_args+=("--hmac=${hmac_ids[${1#--hash=}]}")
+			;;
+		*)
+			secret_args+=("$1")
+			;;
+		esac
+		shift
+	done
+	set -- "${secret_args[@]}"
 
 	if ((!_is_nvme_cli_pre_v3)); then
 		local -a kxchap_args=()

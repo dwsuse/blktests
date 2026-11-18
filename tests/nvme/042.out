@@ -1,8 +1,8 @@
 Running nvme/042
-Testing hmac 0
-Testing hmac 1
-Testing hmac 2
-Testing hmac 3
+Testing hash none
+Testing hash sha256
+Testing hash sha384
+Testing hash sha512
 Testing key length 32
 Testing key length 48
 Testing key length 64

@@ -1,7 +1,7 @@
 Running nvme/043
-Testing hash hmac(sha256)
-Testing hash hmac(sha384)
-Testing hash hmac(sha512)
+Testing hash sha256
+Testing hash sha384
+Testing hash sha512
 Testing DH group ffdhe2048
 Testing DH group ffdhe3072
 Testing DH group ffdhe4096
