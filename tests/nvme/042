@@ -27,18 +27,18 @@ test() {
 
 	_setup_nvmet
 
-	local hmac
+	local hash
 	local key_len
 	local hostkey
 	local ctrldev
 
 	_nvmet_target_setup --blkdev file
 
-	for hmac in 0 1 2 3; do
-		echo "Testing hmac ${hmac}"
-		hostkey="$(_nvme_gen_kxchap_secret --hmac=${hmac} 2> /dev/null)"
+	for hash in none sha256 sha384 sha512; do
+		echo "Testing hash ${hash}"
+		hostkey="$(_nvme_gen_kxchap_secret --hash="${hash}" 2> /dev/null)"
 		if [ -z "$hostkey" ] ; then
-			echo "couldn't generate host key for hmac ${hmac}"
+			echo "couldn't generate host key for hash ${hash}"
 			return 1
 		fi
 		_set_nvmet_hostkey "${def_hostnqn}" "${hostkey}"
